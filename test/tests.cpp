@@ -80,10 +80,12 @@ protected:
 };
 
 TEST_F(ServerEvaluateShot, Hit_Detected){
+    //if statement that checks shot and returns 1 if hit and compares it to HIT
     ASSERT_EQ(HIT, srv.evaluate_shot(2,1,0));
 }
 
 TEST_F(ServerEvaluateShot, Miss_Detected){
+    //same as above
     ASSERT_EQ(MISS, srv.evaluate_shot(2,0,0));
 }
 

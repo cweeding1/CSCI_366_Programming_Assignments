@@ -22,14 +22,27 @@ Client::~Client() {
 
 
 void Client::initialize(unsigned int player, unsigned int board_size){
+    //10x10 board
+    //take the player number entered and assign it, look at board and determine size
+
+    //make matrix board_size x board_size dimensions
+        //get into json file and use for loop to fill array with it?
+
+    //make the action board and fill with "O"
+    string Action_Board[BOARD_SIZE][BOARD_SIZE] = {{"O"}};
 }
 
 
 void Client::fire(unsigned int x, unsigned int y) {
+    //figure out where to ask for coordinates
+    //row and column of matrix
 }
 
 
 bool Client::result_available() {
+    //no result file
+
+    //good result file
 }
 
 
