@@ -22,11 +22,11 @@ Client::~Client() {
 
 void Client::initialize(unsigned int player, unsigned int board_size){
 
-    std::vector<std::vector<int>> action_board;
-
     //sets vector and fills with 0's
+    std::vector<std::vector<int>> action_board;
     action_board.resize(board_size, std::vector<int>(board_size, 0));
 
+    //sets constand "board_name" defined in hpp file
     if(player == 1){
         Client::player = 1;
         board_name = "player_1.action_board.json";
@@ -90,12 +90,12 @@ int Client::get_result() {
     } else if (Client::player == 2) {
         fileName = "player_2.result.json";
     }
-
+    //define an int that holds HIT,MISS,OUT_OF_BOUNDS
     int shotResult;
     ifstream result_read(fileName);
     cereal::JSONInputArchive result_ready(result_read);
     result_ready(shotResult);
-
+    //remove files so they do not get used twice
     remove("player_1.result.json");
     remove("player_2.result.json");
 
@@ -113,7 +113,7 @@ int Client::get_result() {
 void Client::update_action_board(int result, unsigned int x, unsigned int y) {
 
     string fileName;
-
+    //change file name based on player number
     if (Client::player == 1) {
         fileName = "player_1.action_board.json";
     } else if (Client::player == 2) {
@@ -122,23 +122,43 @@ void Client::update_action_board(int result, unsigned int x, unsigned int y) {
 
     //initialize vector for the action board
     vector<vector<int>> actionBoard;
-
     std::ifstream action_file_read(fileName);
     cereal::JSONInputArchive archive_in(action_file_read);
     archive_in(actionBoard);
     actionBoard[x][y] = result;
 
-    if (result == HIT) {
-        ofstream array_ofp("player_1.action_board.json");
-        cereal::JSONOutputArchive write_archive(array_ofp);
-        write_archive(cereal::make_nvp("board", actionBoard));
+    if(Client::player ==  1){
+        if(result == HIT) {
+            ofstream outputResult("player_1.action_board.json");
+            cereal::JSONOutputArchive writeOutput(outputResult);
+            writeOutput(cereal::make_nvp("board", actionBoard));
 
-    } else if (result == MISS) {
-        ofstream array_ofp("player_1.action_board.json");
-        cereal::JSONOutputArchive write_archive(array_ofp);
-        write_archive(cereal::make_nvp("board", actionBoard));
+        }else if (result == MISS) {
+            ofstream outputResult("player_1.action_board.json");
+            cereal::JSONOutputArchive writeOutput(outputResult);
+            writeOutput(cereal::make_nvp("board", actionBoard));
+        }
+    }else if(Client::player == 2){
+        if(result == HIT) {
+            ofstream outputResult("player_2.action_board.json");
+            cereal::JSONOutputArchive writeOutput(outputResult);
+            writeOutput(cereal::make_nvp("board", actionBoard));
+
+        }else if (result == MISS) {
+            ofstream outputResult("player_2.action_board.json");
+            cereal::JSONOutputArchive writeOutput(outputResult);
+            writeOutput(cereal::make_nvp("board", actionBoard));
+        }
     }
 }
 
 string Client::render_action_board() {
+
+    /*
+    if(Client::player == 1){
+        return "player_1.action_board.json \n";
+    }else if(Client::player == 2){
+        return "player_2.action_board.json \n";
+    }
+     */
 }
