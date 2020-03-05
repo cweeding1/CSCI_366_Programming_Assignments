@@ -28,80 +28,65 @@
  * @return length of the file in bytes
  */
 int get_file_length(ifstream *file){
-    return 2;
+
 }
 
-char board_1_array[BOARD_SIZE][BOARD_SIZE];
-char board_2_array[BOARD_SIZE][BOARD_SIZE];
-
-char action_1_array[BOARD_SIZE][BOARD_SIZE] = {{"O"}};
-char action_2_array[BOARD_SIZE][BOARD_SIZE] = {{"O"}};
-
+char array1[BOARD_SIZE][BOARD_SIZE];
+char array2[BOARD_SIZE][BOARD_SIZE];
 
 void Server::initialize(unsigned int board_size, string p1_setup_board, string p2_setup_board){
 
-    //ifstream *ifs ((ifstream *) "player_1.setup_board.txt");
-    //int file_length = get_file_length(ifs);
-
-    if(board_size != BOARD_SIZE){
-        __throw_bad_exception();
+    //using current board size
+    this->board_size = board_size;
+    if(this->board_size != BOARD_SIZE){
+        throw ServerException("Wrong Board Size");
     }
-
     //bad file name
     if(p1_setup_board != "player_1.setup_board.txt" && p2_setup_board != "player_2.setup_board.txt"){
-        __throw_bad_exception();
+        throw ServerException("Bad File Name");
     }
-
-    ifstream board_start;
-    board_start.open("player_1.setup_board.txt");
-
-    for(int r = 0; r < BOARD_SIZE; r++){
-        for(int c = 0; c < BOARD_SIZE; c++){
-            board_start >> board_1_array[r][c];
-            cout << board_1_array[r][c];
+    ifstream board1;
+    ifstream board2;
+    board1.open("player_1.setup_board.txt");
+    board2.open("player_2.setup_board.txt");
+    //fill arrays with board contents
+    for(int i = 0; i < BOARD_SIZE; i++){
+        for(int j = 0; j < BOARD_SIZE; j++){
+            board1 >> array1[i][j];
+            board2 >> array2[i][j];
         }
-        cout << "\n";
     }
-
 }
-
 
 int Server::evaluate_shot(unsigned int player, unsigned int x, unsigned int y) {
 
     //bad player number
     if (player < 1 || player > 2) {
-        __throw_bad_exception();
+        throw ServerException("Bad Player Number");
     }
-
+    //max in bounds
     if (x == (BOARD_SIZE - 1) || y == (BOARD_SIZE - 1)) {
         nothrow;
     }
-
-    //hit/miss
-    //if(board_1_array[y][x] == "_"){
-        //return miss
-    //}
-    //else{
-    // return hit
-    //}
-
-    if(x == 1){
-        return 1;
+    //out of bounds
+    if(x >= board_size || x < 0 || y < 0 || y >= board_size){
+        return OUT_OF_BOUNDS;
     }
-    if(x == 0){
-        return -1;
+    //hit or miss returned
+    //out of bounds already handled
+    if(player == 1) {
+        if (array2[y][x] == '_') {
+            return MISS;
+        } else if (array2[y][x] != '_') {
+            return HIT;
+        }
+    } else{
+        if (array1[y][x] == '_') {
+            return MISS;
+        } else if (array1[y][x] != '_') {
+            return HIT;
+        }
     }
-
-    if(x > board_size || y > board_size){
-        return 0;
-    }
-
-
-    //if(y < 0 || y > (board_size- 1 ) || x < 0 || x > (board_size - 1)){
-      //  return 0;
-    //}
-
-
 }
 
 
@@ -109,8 +94,40 @@ int Server::process_shot(unsigned int player) {
 
     //bad player number
     if(player < 1 || player > 2){
-        __throw_bad_exception();
+        throw ServerException("Bad Player Number");
     }
+    //declare x and y shot variables
+    int x, y;
+    if(player == 1) {
+        std::ifstream shot("player_1.shot.json");
+        cereal::JSONInputArchive inputShot(shot);
+        inputShot(x, y);
 
-   return NO_SHOT_FILE;
+        int result = evaluate_shot(player, x, y);
+
+        std::ofstream file("player_1.result.json");
+        cereal::JSONOutputArchive outputShot(file);
+        outputShot(CEREAL_NVP(result));
+
+        //remove file in between shots
+        remove("player_1.shot.json");
+        return SHOT_FILE_PROCESSED;
+    } else if(player == 2){
+        std::ifstream shot("player_2.shot.json");
+        cereal::JSONInputArchive inputShot(shot);
+        inputShot(x, y);
+
+        int result = evaluate_shot(player, x, y);
+
+        std::ofstream file("player_2.result.json");
+        cereal::JSONOutputArchive outputShot(file);
+        outputShot(CEREAL_NVP(result));
+
+        //remove file in between shots
+        remove("player_2.shot.json");
+        return SHOT_FILE_PROCESSED;
+    } else {
+        //return if no shot file present
+        return NO_SHOT_FILE;
+    }
 }

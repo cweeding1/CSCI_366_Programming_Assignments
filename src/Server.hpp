@@ -73,9 +73,7 @@ public:
     * @param p1_setup_board - file name of player 1's board
     * @param p2_setup_board - file name of player 2's board
     */
-   void initialize(unsigned int board_size,
-                   string p1_setup_board,
-                   string p2_setup_board);
+   void initialize(unsigned int board_size, string p1_setup_board, string p2_setup_board);
 
    /**
     * Checks the coordinates of a shot against setup board of player
