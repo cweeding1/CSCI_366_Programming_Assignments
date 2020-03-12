@@ -20,6 +20,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace std;
+
 
 /**
  * Calculate the length of a file (helper function)
@@ -42,15 +44,17 @@ char array2[BOARD_SIZE][BOARD_SIZE];
 
 //never used? Don't know what to use for
 int get_file_length(ifstream *file){
-    
+    file->seekg(0, ios::beg);
+    int start = file->tellg();
+    file->seekg(0, ios::end);
+    int end = file->tellg();
+    return end - start;
 }
 
 void Server::initialize(unsigned int board_size, string p1_setup_board, string p2_setup_board){
 
-    Server::board_size = BOARD_SIZE;
-    //Server::p1_setup_board;
-    //Server::p2_setup_board;
 
+    Server::board_size = BOARD_SIZE;
 
     //using current board size instead of board size defined in Server.hpp
     this->board_size = board_size;
@@ -73,6 +77,8 @@ void Server::initialize(unsigned int board_size, string p1_setup_board, string p
             Server::p2_setup_board >> array2[i][j];
         }
     }
+    Server::p1_setup_board.close();
+    Server::p2_setup_board.close();
 }
 
 int Server::evaluate_shot(unsigned int player, unsigned int x, unsigned int y) {
@@ -106,27 +112,30 @@ int Server::evaluate_shot(unsigned int player, unsigned int x, unsigned int y) {
     }
 }
 
-
 int Server::process_shot(unsigned int player) {
 
-    //string fileName;
+    //error happens in process shot
+    //has a problem with the json files
 
     //bad player number
     if(player < 1 || player > 2){
         throw ServerException("Bad Player Number");
     }
+
     //declare x and y shot variables
-    int x, y;
+    int x,y;
 
     //seperate cases for each player
+
     if(player == 1) {
-        std::ifstream shot("player_1.shot.json");
+        ifstream shot("player_1.shot.json");
         cereal::JSONInputArchive inputShot(shot);
         inputShot(x, y);
 
         int result = evaluate_shot(player, x, y);
 
-        std::ofstream file("player_1.result.json");
+        ofstream file("player_1.result.json");
+        //somewhere here
         cereal::JSONOutputArchive outputShot(file);
         outputShot(CEREAL_NVP(result));
 
@@ -134,22 +143,23 @@ int Server::process_shot(unsigned int player) {
         remove("player_1.shot.json");
         return SHOT_FILE_PROCESSED;
     } else if(player == 2){
-        std::ifstream shot("player_2.shot.json");
+        ifstream shot("player_2.shot.json");
         cereal::JSONInputArchive inputShot(shot);
         inputShot(x, y);
 
         int result = evaluate_shot(player, x, y);
 
-        std::ofstream file("player_2.result.json");
+        ofstream file("player_2.result.json");
+        //error happens somewhere here
         cereal::JSONOutputArchive outputShot(file);
         outputShot(CEREAL_NVP(result));
 
         //remove file in between shots
         remove("player_2.shot.json");
         return SHOT_FILE_PROCESSED;
-    } else {
-        //return if no shot file present
-        return NO_SHOT_FILE;
     }
 
+    else {
+        return NO_SHOT_FILE;
+    }
 }
