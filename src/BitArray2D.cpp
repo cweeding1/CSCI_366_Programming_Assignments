@@ -14,33 +14,31 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "common.hpp"
-#include "Client.hpp"
+#include <math.h>
+#include "BitArray2D.hpp"
 
-Client::~Client() {
+BitArray2D::BitArray2D(unsigned int rows, unsigned int columns) {
+
 }
 
 
-void Client::initialize(unsigned int player, unsigned int board_size){
+BitArray2D::~BitArray2D() {
+
 }
 
 
-void Client::fire(unsigned int x, unsigned int y) {
-}
+bool BitArray2D::get(unsigned int row, unsigned int column){
+   // check array bounds
 
-
-bool Client::result_available() {
-}
-
-
-int Client::get_result() {
+   // get the element
+   return get_bit_elem(array, columns, row, column);
 }
 
 
 
-void Client::update_action_board(int result, unsigned int x, unsigned int y) {
-}
+void BitArray2D::set(unsigned int row, unsigned int column){
+   // check array bounds
 
-
-string Client::render_action_board(){
+   // set the element
+   set_bit_elem(array, columns, row, column);
 }
